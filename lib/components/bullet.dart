@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:space_invaders/main.dart';
 
@@ -20,6 +21,11 @@ class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
 
     sprite = await game.loadSprite('bullet.png');
   
+    add(
+      RectangleHitbox(
+        collisionType: CollisionType.passive,
+      ),
+    );
   }
 
 
