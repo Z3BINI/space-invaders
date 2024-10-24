@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
+import 'package:space_invaders/components/Bullet.dart';
 import 'package:space_invaders/main.dart';
 
 class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHandler {
@@ -28,6 +29,7 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
 
     maxMoveLeft = size.x / 2;
     maxMoveRight = gameRef.size.x - size.x / 2;
+
   }
 
   @override
@@ -44,14 +46,22 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     
     if (event is KeyDownEvent) {
+      // Movement
       if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
         velocity.x = -maxSpeed;
       } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
         velocity.x = maxSpeed;
       }
+      
+      // Shoot
+      if (event.logicalKey == LogicalKeyboardKey.space) {
+        shoot();
+      }
+
     }
 
     if (event is KeyUpEvent) {
+      // Movement
       if (event.logicalKey == LogicalKeyboardKey.arrowLeft || event.logicalKey == LogicalKeyboardKey.arrowRight) {
         velocity.x = 0;
       }
@@ -59,4 +69,15 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
     
     return true; // Allow arrow events to other components
   }
+
+
+  shoot() {
+    final Bullet shot = Bullet(
+        direction: Vector2(0, -1)
+      )
+      ..position = Vector2(position.x, position.y - height / 2);
+
+    gameRef.add(shot);
+  }
+
 }
