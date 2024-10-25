@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 import 'package:space_invaders/components/Bullet.dart';
 import 'package:space_invaders/main.dart';
 
-class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHandler {
+class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHandler, CollisionCallbacks {
   
   // Movement properties
   static const double maxSpeed = 200.0;
@@ -29,6 +30,12 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
 
     maxMoveLeft = size.x / 2;
     maxMoveRight = gameRef.size.x - size.x / 2;
+
+    add(
+      CircleHitbox(
+        radius: width / 2,
+      ),
+    );
 
   }
 
@@ -78,6 +85,17 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
       ..position = Vector2(position.x, position.y - height / 2);
 
     gameRef.add(shot);
+  }
+
+  @override
+  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    if (other is Bullet) {
+      // Game lost
+        removeFromParent();
+       gameRef.resetGame();
+    }
   }
 
 }
