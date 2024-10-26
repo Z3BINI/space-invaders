@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:space_invaders/components/enemy.dart';
 import 'package:space_invaders/main.dart';
-import 'package:space_invaders/components/Bullet.dart';
+import 'package:space_invaders/components/bullet.dart';
 
 
 class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
@@ -51,6 +51,7 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
     selfPositioning: true,
     factory: (index) {
       return Bullet(
+        shooter: Enemy(),
         direction: Vector2(0, 1),
         position: currentShooter.absolutePositionOfAnchor(Anchor.bottomCenter),
       );

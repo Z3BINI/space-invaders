@@ -7,13 +7,15 @@ class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
 
   static const double shotSpeed = 750;
   late final Vector2 direction;
+  late final SpriteComponent shooter;
 
   Bullet({
     required this.direction,
+    required this.shooter,
     super.position,
   }) : super(
-          size: Vector2(4, 8),
-          anchor: Anchor.center,
+          size: Vector2(8, 16),
+          anchor: (direction == Vector2(0, -1) ? Anchor.bottomCenter : Anchor.topCenter), // To avoid self hits
   );
   
   @override

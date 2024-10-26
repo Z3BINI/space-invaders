@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:space_invaders/main.dart';
-import 'package:space_invaders/components/Bullet.dart';
+import 'package:space_invaders/components/bullet.dart';
 import 'package:space_invaders/components/swarm.dart';
 
 class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCallbacks {
@@ -40,7 +40,8 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
 
-    if (other is Bullet) {
+
+    if (other is Bullet &&  other.shooter is! Enemy) {
       Swarm.enemiesAlive -= 1; // For the swarm to move faster with each casualty
       removeFromParent();
       other.removeFromParent();

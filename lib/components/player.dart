@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
-import 'package:space_invaders/components/Bullet.dart';
+import 'package:space_invaders/components/bullet.dart';
 import 'package:space_invaders/main.dart';
 
 class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHandler, CollisionCallbacks {
@@ -80,6 +80,7 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
 
   shoot() {
     final Bullet shot = Bullet(
+        shooter: this,
         direction: Vector2(0, -1)
       )
       ..position = Vector2(position.x, position.y - height / 2);
@@ -91,7 +92,8 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
 
-    if (other is Bullet) {
+
+    if (other is Bullet && other.shooter is! Player) {
       // Game lost
         removeFromParent();
        gameRef.resetGame();
