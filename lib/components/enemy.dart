@@ -3,6 +3,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame_audio/flame_audio.dart';
 import 'package:space_invaders/components/bullet.dart';
+import 'package:space_invaders/components/explosion.dart';
 import 'package:space_invaders/components/swarm.dart';
 import 'package:space_invaders/components/space_invaders.dart';
 
@@ -43,6 +44,7 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
     if (other is Bullet &&  other.shooter is! Enemy) {
       Swarm.enemiesAlive -= 1; // For the swarm to move faster with each casualty
+      gameRef.add(Explosion(position: absoluteCenter));
       removeFromParent();
       other.removeFromParent();
 
@@ -59,6 +61,7 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
       } else {
         // Game won
+        Swarm().stopShooting();
         FlameAudio.play('stage_clear.mp3');
         gameRef.resetGame();
       }

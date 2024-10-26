@@ -11,45 +11,44 @@ import 'package:flame_audio/flame_audio.dart';
 
 
 class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDetection {
-  late final Player player; //  Disallow null & reference alteration
+  static final Vector2 gameResolution = Vector2(500, 650); // Desired game resolution
   late final ParallaxComponent _parallaxBackground;
+  late Player player;
   late Swarm swarm; 
-  final Vector2 gameResolution = Vector2(500, 650);
 
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
 
-    camera.viewport = FixedResolutionViewport(resolution: gameResolution);
+    camera.viewport = FixedResolutionViewport(resolution: gameResolution); // Set game resolution
 
+    _parallaxBackground = await _loadParallax();
+    add(_parallaxBackground);
   }
 
   void startGame() async {
     FlameAudio.bgm.initialize();
-    FlameAudio.bgm.play('background_music.mp3', volume: .5);
+    FlameAudio.bgm.play('background_music.mp3', volume: .3);
 
-    _parallaxBackground = await _loadParallax();
-    player = Player();
-    swarm = Swarm();
-    
-    add(_parallaxBackground);
-    add(player);
-    add(swarm);
+    instantiateGameComponents();
   }
 
   void resetGame() {
     Future.delayed(const Duration(seconds: 2), () {
       for (var child in children) {
-        if (child is Player || child is ParallaxComponent) continue;
-
+        if (child is ParallaxComponent) continue; // Keep parallax while resetting
         child.removeFromParent();
-
       }
-      
-      add(Swarm());
-      add(player);
-
+      instantiateGameComponents();
     });
+  }
+
+  void instantiateGameComponents() {
+    player = Player();
+    swarm = Swarm(); 
+
+    add(player);
+    add(swarm);
   }
 
 

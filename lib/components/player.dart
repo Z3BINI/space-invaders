@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 import 'package:space_invaders/components/bullet.dart';
+import 'package:space_invaders/components/explosion.dart';
 import 'package:space_invaders/components/space_invaders.dart';
 import 'package:flame_audio/flame_audio.dart';
 
@@ -14,8 +15,10 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
   Vector2 velocity = Vector2.zero();
 
   // Playing field properties
-  static late final double maxMoveLeft;
-  static late final double maxMoveRight;
+  static late double maxMoveLeft;
+  static late double maxMoveRight;
+
+  late AudioPool shotSfxPool;
   
   Player () : super ( // Initialize parent's required parameters.
     size: Vector2.all(32),
@@ -31,11 +34,17 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
 
     maxMoveLeft = size.x / 2;
     maxMoveRight = gameRef.size.x - size.x / 2;
+    velocity = Vector2.zero(); // Reset on death
 
     add(
       CircleHitbox(
         radius: width / 2,
       ),
+    );
+
+    shotSfxPool = await FlameAudio.createPool(
+      'shot.mp3',
+      maxPlayers: 1,
     );
 
   }
@@ -87,7 +96,7 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
       ..position = Vector2(position.x, position.y - height / 2);
 
     gameRef.add(shot);
-    FlameAudio.play('shot.mp3');
+    shotSfxPool.start();
   }
 
   @override
@@ -96,6 +105,7 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
 
     if (other is Bullet && other.shooter is! Player) {
       // Game lost
+        gameRef.add(Explosion(position: absoluteCenter));
         removeFromParent();
         FlameAudio.play('game_over.mp3');
        gameRef.resetGame();
