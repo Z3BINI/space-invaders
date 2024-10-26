@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:space_invaders/components/enemy.dart';
-import 'package:space_invaders/main.dart';
 import 'package:space_invaders/components/bullet.dart';
+import 'package:space_invaders/components/space_invaders.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 
 class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
@@ -50,6 +51,7 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
     period: 1.5,
     selfPositioning: true,
     factory: (index) {
+      FlameAudio.play('enemy_shot.mp3');
       return Bullet(
         shooter: Enemy(),
         direction: Vector2(0, 1),
@@ -103,6 +105,7 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
 
   void move() {
     if (reachedEdge) { 
+      FlameAudio.play('bounce.mp3');
       reachedEdge = false;
       position.y += yMoveAmount;
       isMovingRight = !isMovingRight;

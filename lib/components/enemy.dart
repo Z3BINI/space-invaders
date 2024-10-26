@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:space_invaders/main.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:space_invaders/components/bullet.dart';
 import 'package:space_invaders/components/swarm.dart';
+import 'package:space_invaders/components/space_invaders.dart';
 
 class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCallbacks {
   static final Vector2 enemySize = Vector2.all(32); // For swarm grid to have a size reference
@@ -40,15 +41,15 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
 
-
     if (other is Bullet &&  other.shooter is! Enemy) {
       Swarm.enemiesAlive -= 1; // For the swarm to move faster with each casualty
       removeFromParent();
       other.removeFromParent();
 
       if (Swarm.enemiesAlive > 0) { 
-        manAbove?.manBelow = manBelow?.manBelow;
-        manBelow?.manAbove = manAbove?.manAbove;
+
+        manAbove?.manBelow = manBelow;
+        manBelow?.manAbove = manAbove;
 
         // If was shooter get enemy above into the shooter pool
         if (Swarm.enemyShooters.remove(this)) {        
@@ -58,6 +59,7 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
       } else {
         // Game won
+        FlameAudio.play('stage_clear.mp3');
         gameRef.resetGame();
       }
     }

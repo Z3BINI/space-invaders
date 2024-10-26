@@ -4,7 +4,8 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/services.dart';
 import 'package:space_invaders/components/bullet.dart';
-import 'package:space_invaders/main.dart';
+import 'package:space_invaders/components/space_invaders.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHandler, CollisionCallbacks {
   
@@ -86,16 +87,17 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
       ..position = Vector2(position.x, position.y - height / 2);
 
     gameRef.add(shot);
+    FlameAudio.play('shot.mp3');
   }
 
   @override
   void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollisionStart(intersectionPoints, other);
 
-
     if (other is Bullet && other.shooter is! Player) {
       // Game lost
         removeFromParent();
+        FlameAudio.play('game_over.mp3');
        gameRef.resetGame();
     }
   }
