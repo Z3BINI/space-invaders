@@ -38,6 +38,9 @@ dependencies:
   flame: ^1.21.0
   flame_audio: ^2.10.5
   flame_bloc: ^1.12.3
+  bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
