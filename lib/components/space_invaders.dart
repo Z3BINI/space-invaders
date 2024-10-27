@@ -3,6 +3,7 @@ import 'package:flame/camera.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+import 'package:flame/palette.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/widgets.dart';
 import 'package:space_invaders/components/player.dart';
@@ -12,9 +13,24 @@ import 'package:flame_audio/flame_audio.dart';
 
 class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasCollisionDetection {
   static final Vector2 gameResolution = Vector2(500, 650); // Desired game resolution
+  
+  static const int maxLives = 3;
+  static int lives = maxLives;
+  static int points = 0;
+
   late final ParallaxComponent _parallaxBackground;
   late Player player;
   late Swarm swarm; 
+
+  late TextComponent livesUi;
+  late TextComponent pointsUi;
+
+  final regular = TextPaint(
+    style: TextStyle(
+      fontSize: 16.0,
+      color: BasicPalette.white.color,
+    ),
+  );
 
   @override
   FutureOr<void> onLoad() async {
@@ -24,33 +40,87 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
 
     _parallaxBackground = await _loadParallax();
     add(_parallaxBackground);
+
+    await FlameAudio.audioCache.loadAll(['explosion.mp3', 'background_music.mp3', 'shot.mp3', 'bounce.mp3', 'enemy_shot.mp3', 'stage_clear.mp3', 'game_over.mp3']);
   }
 
-  void startGame() async {
+  void startGame() {
     FlameAudio.bgm.initialize();
     FlameAudio.bgm.play('background_music.mp3', volume: .3);
 
-    instantiateGameComponents();
+    instantiatePlayer(true);
+    instantiateUiElements();
+    instantiateSwarm();
   }
 
   void resetGame() {
+    instantiatePlayer(true);
+    
+    updateLifeUi();
+    updatePointsUi();
+    
     Future.delayed(const Duration(seconds: 2), () {
-      for (var child in children) {
-        if (child is ParallaxComponent) continue; // Keep parallax while resetting
-        child.removeFromParent();
-      }
-      instantiateGameComponents();
+      instantiateSwarm();
     });
   }
 
-  void instantiateGameComponents() {
-    player = Player();
-    swarm = Swarm(); 
+  void stageCleared() {
+    swarm.die();
+    FlameAudio.play('stage_clear.mp3');
+    Future.delayed(const Duration(seconds: 2), () {
+      instantiateSwarm();
+    });
+  }
 
-    add(player);
+  void gameOver() {
+    FlameAudio.play('game_over.mp3');
+    Future.delayed(const Duration(seconds: 2), () {
+      swarm.die();
+      resetGame();
+    });
+  }
+
+  void instantiateUiElements() {
+    livesUi = TextBoxComponent(
+      textRenderer: regular,
+      text: 'Lives: $lives',
+      position: Vector2(0, 0),
+    );
+
+    pointsUi = TextBoxComponent(
+      textRenderer: regular,
+      text: 'Points: $points',
+      position: Vector2(0, 30),
+    );
+
+    add(livesUi);
+    add(pointsUi);
+  }
+
+  void instantiateSwarm() {
+    swarm = Swarm();
     add(swarm);
   }
 
+  void instantiatePlayer(bool isNewGame) {
+    if (isNewGame) {
+  
+      lives = maxLives;
+      points = 0;
+
+      player = Player();
+      add(player);
+  
+    } else {
+      Future.delayed(const Duration(seconds: 2), () {
+        player.resetPosition();
+        add(player);
+      });
+    }
+  }
+
+  void updatePointsUi() => pointsUi.text = 'Points: $points';
+  void updateLifeUi() => livesUi.text = 'Lives: $lives';
 
   Future<ParallaxComponent> _loadParallax() async {
 
@@ -87,4 +157,5 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
     return ParallaxComponent(parallax: parallax);
 
   }
+
 }

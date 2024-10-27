@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flame_audio/flame_audio.dart';
+import 'package:flame/effects.dart';
+import 'package:flutter/material.dart';
 import 'package:space_invaders/components/bullet.dart';
 import 'package:space_invaders/components/explosion.dart';
 import 'package:space_invaders/components/swarm.dart';
@@ -9,6 +10,8 @@ import 'package:space_invaders/components/space_invaders.dart';
 
 class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCallbacks {
   static final Vector2 enemySize = Vector2.all(32); // For swarm grid to have a size reference
+  static int pointWorth = 10;
+  
   // To help keep track of possible shooters (downmost enemy)
   Enemy? manAbove;
   Enemy? manBelow;
@@ -25,6 +28,19 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
         radius: width / 2,
       ),
     );
+
+    add( 
+      ColorEffect(
+        Colors.green,
+        EffectController(
+          duration: 1.5,
+          reverseDuration: 1,
+          infinite: true,
+        ),
+        opacityTo: 0.8,
+      ),
+    );   
+
   } 
 
   @override
@@ -44,9 +60,13 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
     if (other is Bullet &&  other.shooter is! Enemy) {
       Swarm.enemiesAlive -= 1; // For the swarm to move faster with each casualty
-      gameRef.add(Explosion(position: absoluteCenter));
       removeFromParent();
       other.removeFromParent();
+      gameRef.add(Explosion(position: absoluteCenter));
+      gameRef.swarm.explosionSfxPool.start();
+      
+      SpaceInvaders.points += pointWorth;
+      gameRef.updatePointsUi();
 
       if (Swarm.enemiesAlive > 0) { 
 
@@ -61,9 +81,7 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
       } else {
         // Game won
-        Swarm().stopShooting();
-        FlameAudio.play('stage_clear.mp3');
-        gameRef.resetGame();
+        gameRef.stageCleared();
       }
     }
   }

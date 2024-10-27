@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/rendering.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:space_invaders/components/bullet.dart';
+import 'package:space_invaders/components/enemy.dart';
 import 'package:space_invaders/components/explosion.dart';
 import 'package:space_invaders/components/space_invaders.dart';
 import 'package:flame_audio/flame_audio.dart';
@@ -19,6 +23,7 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
   static late double maxMoveRight;
 
   late AudioPool shotSfxPool;
+  late AudioPool explosionSfxPool;
   
   Player () : super ( // Initialize parent's required parameters.
     size: Vector2.all(32),
@@ -30,11 +35,11 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
     await super.onLoad();
 
     sprite = await gameRef.loadSprite('player.png');
-    position = Vector2(gameRef.size.x / 2, gameRef.size.y - size.y / 2); // Bottom center of screen
 
     maxMoveLeft = size.x / 2;
     maxMoveRight = gameRef.size.x - size.x / 2;
-    velocity = Vector2.zero(); // Reset on death
+    
+    resetPosition();
 
     add(
       CircleHitbox(
@@ -47,6 +52,16 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
       maxPlayers: 1,
     );
 
+    explosionSfxPool = await FlameAudio.createPool(
+      'explosion.mp3',
+      maxPlayers: 1,
+    );
+
+
+
+    Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    final playerColorDecorator = PaintDecorator.tint(randomColor);
+    decorator.addLast(playerColorDecorator);
   }
 
   @override
@@ -73,6 +88,11 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
       // Shoot
       if (event.logicalKey == LogicalKeyboardKey.space) {
         shoot();
+      }
+
+      // Change colors
+      if (event.logicalKey == LogicalKeyboardKey.keyG) {
+        getRandomColor();
       }
 
     }
@@ -104,12 +124,41 @@ class Player extends SpriteComponent with HasGameRef<SpaceInvaders>, KeyboardHan
     super.onCollisionStart(intersectionPoints, other);
 
     if (other is Bullet && other.shooter is! Player) {
-      // Game lost
-        gameRef.add(Explosion(position: absoluteCenter));
-        removeFromParent();
-        FlameAudio.play('game_over.mp3');
-       gameRef.resetGame();
+      
+      other.removeFromParent(); // Wasnt removing bullet before
+      die();
+      
+      if (SpaceInvaders.lives <= 0) {
+        gameRef.gameOver();
+      
+      } else {
+
+        gameRef.instantiatePlayer(false);
+      }
+    } else if (other is Enemy) {
+      die();
+      gameRef.gameOver();
     }
+  }
+
+  void getRandomColor() {
+    decorator.removeLast();
+    Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    final playerColorDecorator = PaintDecorator.tint(randomColor);
+    decorator.addLast(playerColorDecorator);
+  }
+
+  void die() {
+    removeFromParent();
+    SpaceInvaders.lives -= 1;
+    gameRef.updateLifeUi();
+    gameRef.add(Explosion(position: absoluteCenter));
+    explosionSfxPool.start();
+  }
+
+  void resetPosition() {
+    position = Vector2(gameRef.size.x / 2, gameRef.size.y - size.y / 2); // Bottom center of screen
+    velocity = Vector2.zero(); // Reset on death
   }
 
 }

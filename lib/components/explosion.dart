@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:space_invaders/components/space_invaders.dart';
-import 'package:flame_audio/flame_audio.dart';
 
 class Explosion extends SpriteAnimationComponent with HasGameRef<SpaceInvaders> {
 
@@ -15,8 +14,6 @@ class Explosion extends SpriteAnimationComponent with HasGameRef<SpaceInvaders> 
 
   @override
   FutureOr<void> onLoad() async {
-
-    FlameAudio.play('explosion.mp3');
 
     animation = await game.loadSpriteAnimation(
       'explosion.png', 

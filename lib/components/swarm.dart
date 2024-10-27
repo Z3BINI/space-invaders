@@ -9,7 +9,7 @@ import 'package:flame_audio/flame_audio.dart';
 
 class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
   // Swarm grid data
-  static final Vector2 gridSize = Vector2(1, 5);
+  static final Vector2 gridSize = Vector2(8, 4);
   static int rowSpacing = 22; 
   static int columnSpacing = 16; 
   // Swarm Movement data
@@ -34,6 +34,8 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
   static double shootDurTimeMax = 4.5;
   static Timer shootCdTimer = Timer(shootCdmax);
   static Timer shootActiveTimer = Timer(shootDurTimeMin);
+
+  late AudioPool explosionSfxPool;
   
   @override
   FutureOr<void> onLoad() async {
@@ -43,15 +45,26 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
     enemiesAlive = gridSize.x * gridSize.y;
     enemyShooters = <Enemy>[]; 
     isMovingRight = true;
+    position.y = gameRef.size.y / 4;
 
     setSwarmGrid();
     pickShooter();
+
+    AudioPool shotSfxPool = await FlameAudio.createPool(
+      'enemy_shot.mp3',
+      maxPlayers: 1,
+    );
+
+    explosionSfxPool = await FlameAudio.createPool(
+      'explosion.mp3',
+      maxPlayers: 1,
+    );
     
     _bulletSpawner = SpawnComponent(
     period: 1.5,
     selfPositioning: true,
     factory: (index) {
-      FlameAudio.play('enemy_shot.mp3');
+      shotSfxPool.start();
       return Bullet(
         shooter: Enemy(),
         direction: Vector2(0, 1),
@@ -163,6 +176,12 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
 
   void stopShooting() {
     _bulletSpawner.timer.stop();
+  }
+
+  void die() {
+    stopShooting();
+    _bulletSpawner.removeFromParent(); // Wasn't getting removed on swarm death!
+    removeFromParent();
   }
   
 }

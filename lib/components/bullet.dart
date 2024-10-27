@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:math';
+import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/particles.dart';
+import 'package:flutter/material.dart';
 import 'package:space_invaders/components/space_invaders.dart';
 
 class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
@@ -15,7 +19,7 @@ class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
     super.position,
   }) : super(
           size: Vector2(8, 16),
-          anchor: (direction == Vector2(0, -1) ? Anchor.bottomCenter : Anchor.topCenter), // To avoid self hits
+          anchor: Anchor.center,
   );
   
   @override
@@ -28,6 +32,7 @@ class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
         collisionType: CollisionType.passive,
       ),
     );
+    
   }
 
 
@@ -39,5 +44,33 @@ class Bullet extends SpriteComponent with HasGameRef<SpaceInvaders> {
       removeFromParent();
     }
   
+    final particleComponent = ParticleSystemComponent(
+      particle: Particle.generate( 
+      
+        count: 8,
+        lifespan: 0.05,
+        generator: (i) => AcceleratedParticle(
+          acceleration: getRandomVector(),
+          speed: getRandomVector(),
+          position: position.clone(),
+          child: CircleParticle(
+            radius: .75,
+            paint: Paint()..color = Colors.orange,
+          ),
+        )
+      
+      ),
+      
+    );
+
+    gameRef.add(particleComponent);
   }
+
+  Vector2 getRandomVector() {
+    Random random = Random();
+    return (Vector2.random(random) - Vector2(0.5, direction.y)) * 250;
+  }
+
 }
+
+

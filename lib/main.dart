@@ -17,22 +17,29 @@ class GameApp extends StatelessWidget {
       home: Scaffold(
         body: Stack(
           children: [
-            GameWidget(
-              game: spaceInvadersGame,
-              overlayBuilderMap: {
-                'MainMenu': (context, SpaceInvaders spaceInvadersGame) {
-                  return MainMenuOverlay(
-                    onStartPressed: () {
-                      spaceInvadersGame.startGame(); // Start the game
-                      spaceInvadersGame.overlays.remove('MainMenu'); // Hide menu overlay
+            Center(
+              child: SizedBox(
+                width: SpaceInvaders.gameResolution.x,
+                height: SpaceInvaders.gameResolution.y,
+                child: GameWidget(
+                  game: spaceInvadersGame,
+                  overlayBuilderMap: {
+                    'MainMenu': (context, SpaceInvaders spaceInvadersGame) {
+                      return MainMenuOverlay(
+                        onStartPressed: () {
+                          spaceInvadersGame.startGame(); // Start the game
+                          spaceInvadersGame.overlays.remove('MainMenu'); // Hide menu overlay
+                        },
+                      );
                     },
-                  );
-                },
-              },
-              initialActiveOverlays: const ['MainMenu'], // Show menu first
+                  },
+                  initialActiveOverlays: const ['MainMenu'], // Show menu first
+                ),
+              ),
             ),
           ],
         ),
+        backgroundColor: Colors.deepPurple.shade900,
       ),
     );
   }
