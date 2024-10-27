@@ -6,6 +6,7 @@ import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
 import 'package:flame/parallax.dart';
 import 'package:flutter/widgets.dart';
+import 'package:space_invaders/bloc/player/player_bloc.dart';
 import 'package:space_invaders/components/player.dart';
 import 'package:space_invaders/components/swarm.dart';
 import 'package:flame_audio/flame_audio.dart';
@@ -15,8 +16,8 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
   static final Vector2 gameResolution = Vector2(500, 650); // Desired game resolution
   
   static const int maxLives = 3;
-  static int lives = maxLives;
-  static int points = 0;
+  int lives = maxLives;
+  int points = 0;
 
   late final ParallaxComponent _parallaxBackground;
   late Player player;
@@ -32,6 +33,10 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
     ),
   );
 
+  
+  late final AudioPool shotSfxPool; 
+  late final AudioPool explosionSfxPool;
+
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
@@ -42,6 +47,9 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
     add(_parallaxBackground);
 
     await FlameAudio.audioCache.loadAll(['explosion.mp3', 'background_music.mp3', 'shot.mp3', 'bounce.mp3', 'enemy_shot.mp3', 'stage_clear.mp3', 'game_over.mp3']);
+
+    shotSfxPool = await FlameAudio.createPool('shot.mp3', maxPlayers: 1);
+    explosionSfxPool = await FlameAudio.createPool('explosion.mp3', maxPlayers: 1);
   }
 
   void startGame() {
@@ -59,7 +67,7 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
     updateLifeUi();
     updatePointsUi();
     
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       instantiateSwarm();
     });
   }
@@ -67,14 +75,14 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
   void stageCleared() {
     swarm.die();
     FlameAudio.play('stage_clear.mp3');
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       instantiateSwarm();
     });
   }
 
   void gameOver() {
     FlameAudio.play('game_over.mp3');
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       swarm.die();
       resetGame();
     });
@@ -108,15 +116,15 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
       lives = maxLives;
       points = 0;
 
-      player = Player();
+      player = Player(PlayerBloc());
       add(player);
   
-    } else {
-      Future.delayed(const Duration(seconds: 2), () {
-        player.resetPosition();
-        add(player);
-      });
-    }
+    } 
+    
+  }
+
+  void instantiateAudioPlayers() {
+    
   }
 
   void updatePointsUi() => pointsUi.text = 'Points: $points';
