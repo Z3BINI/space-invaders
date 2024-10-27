@@ -15,7 +15,7 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
   // Swarm Movement data
   static const double xMoveAmount = 2.5;
   static const double yMoveAmount = 32;
-  static double baseMoveTime = 0.5;
+  static double baseMoveTime = 0.1;
   static double hardestMoveTime = 0.001;
   static Timer moveTimer = Timer(baseMoveTime);
   static bool isMovingRight = true;
