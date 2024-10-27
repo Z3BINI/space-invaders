@@ -65,7 +65,7 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
       gameRef.add(Explosion(position: absoluteCenter));
       gameRef.swarm.explosionSfxPool.start();
       
-      SpaceInvaders.points += pointWorth;
+      gameRef.points += pointWorth;
       gameRef.updatePointsUi();
 
       if (Swarm.enemiesAlive > 0) { 
