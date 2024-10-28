@@ -50,36 +50,27 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         final Bullet bullet = event.other as Bullet;
         
         if (bullet.shooter is! Player) {
-
           event.other.removeFromParent(); // Remove bullet
-          
-          state.onExit(player); // Exit current state gracefully
-
-          final newState = PlayerDeadState();
-          newState.onEnter(player);
-          emit(newState);        
-
+          add(PlayerDieEvent()); // trigger death
         }
       
-      } else if (event.other is Enemy) {
-        
-        gameRef.lives = 0;
-
-        state.onExit(player); // Exit current state gracefully
-
-        final newState = PlayerDeadState();
-        newState.onEnter(player);
-        emit(newState);    
-      }
-      
+      }      
 
     });
 
     on<PlayerRespawnEvent>((event, emit) {
-      Future.delayed(const Duration(seconds: 2), () {
-        gameRef.add(player);
-        _resetPosition(); 
-      });
+      _resetPosition();
+      state.onExit(player); // Exit current state gracefully
+      final newState = PlayerRespawningState();
+      newState.onEnter(player);
+      emit(newState);   
+    });
+
+    on<PlayerDieEvent>((event, emit) {
+      state.onExit(player); // Exit current state gracefully
+      final newState = PlayerDeadState();
+      newState.onEnter(player);
+      emit(newState);   
     });
     
 
