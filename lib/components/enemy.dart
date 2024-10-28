@@ -3,6 +3,8 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
+import 'package:space_invaders/bloc/player/player_event.dart';
+import 'package:space_invaders/bloc/player/player_state.dart';
 import 'package:space_invaders/components/bullet.dart';
 import 'package:space_invaders/components/explosion.dart';
 import 'package:space_invaders/components/swarm.dart';
@@ -45,12 +47,16 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
 
   @override
   void update(double dt) {
-    super.update(dt);
-    
+    super.update(dt);  
+
+    if (checkForGameOver() && gameRef.lives > 0) { 
+      gameRef.lives = 0;
+      gameRef.player.playerBloc.add(PlayerDieEvent());
+    }  
+
     // Because when enemies on the edge of swam die the boundries change
     if ((absolutePositionOfAnchor(Anchor.topRight).x > gameRef.size.x && Swarm.isMovingRight) || (absolutePositionOfAnchor(Anchor.topLeft).x < 0 && !Swarm.isMovingRight)) {
-    
-      Swarm.reachedEdge = true;
+      Swarm.reachedEdge = true;      
     } 
   }
 
@@ -85,4 +91,6 @@ class Enemy extends SpriteComponent with HasGameRef<SpaceInvaders>, CollisionCal
       }
     }
   }
+
+  bool checkForGameOver() => (absolutePositionOfAnchor(Anchor.bottomCenter).y >= gameRef.player.absolutePositionOfAnchor(Anchor.topCenter).y);
 }
