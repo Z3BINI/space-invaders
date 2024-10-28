@@ -38,17 +38,19 @@ class PlayerShootingState extends PlayerState {}
 // Player is dead
 class PlayerDeadState extends PlayerState {
   @override
-  void onEnter(Player player) async {
-    player.removeFromParent();
+  void onEnter(Player player) {
     
     player.gameRef.explosionSfxPool.start();
     player.gameRef.add(Explosion(position: player.absoluteCenter));
+    player.removeFromParent();
+
+    if (player.gameRef.lives == 0) { // Only enters as 0 if swarm reaches bottom
+      player.gameRef.updateLifeUi();
+      return player.gameRef.gameOver();
+    }
     
     player.gameRef.lives -= 1;
     player.gameRef.updateLifeUi();
-
-    await Future.delayed(const Duration(seconds: 2));
-
 
     if (player.gameRef.lives <= 0) {
       player.gameRef.gameOver();
@@ -59,7 +61,14 @@ class PlayerDeadState extends PlayerState {
 }
 
 // Player is respawning
-class PlayerRespawningState extends PlayerState {}
+class PlayerRespawningState extends PlayerState {
+  @override
+  void onEnter(Player player) async {
+    await Future.delayed(const Duration(seconds: 1));
+    player.gameRef.add(player);
+    player.playerBloc.add(StopMovingEvent());
+  }
+}
 
 // Player color has changed
 class PlayerColorChangedState extends PlayerState {
