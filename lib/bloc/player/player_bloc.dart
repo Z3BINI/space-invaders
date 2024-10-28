@@ -2,7 +2,6 @@
 import 'package:flame/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:space_invaders/components/bullet.dart';
-import 'package:space_invaders/components/enemy.dart';
 import 'package:space_invaders/components/player.dart';
 import 'package:space_invaders/components/space_invaders.dart';
 import 'player_event.dart';
@@ -14,6 +13,8 @@ import 'package:flame/components.dart';
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   late SpaceInvaders gameRef;
   late Player player;
+  
+  bool _canShoot = true;
 
   PlayerBloc() : super(PlayerIdleState()) {
 
@@ -41,7 +42,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       emit(newState);
     });
     
-    on<ShootEvent>((event, emit) => _shoot());
+    on<ShootEvent>((event, emit) {
+      if (_canShoot) { 
+        _shoot();
+        _shootCoolDown();
+      }
+    
+    });
 
     on<HandleCollisionEvent>((event, emit) {
         
@@ -89,6 +96,12 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Color randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
     final playerColorDecorator = PaintDecorator.tint(randomColor);
     player.decorator.addLast(playerColorDecorator);
+  }
+
+  void _shootCoolDown() async {
+    _canShoot = false;
+    await Future.delayed(const Duration(milliseconds: 250));
+    _canShoot = true;
   }
 
   void _resetPosition() => player.position = Vector2(gameRef.size.x / 2, gameRef.size.y - player.size.y / 2);
