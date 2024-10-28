@@ -9,8 +9,8 @@ import 'package:flame_audio/flame_audio.dart';
 
 class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
   // Swarm grid data
-  static final Vector2 gridSize = Vector2(8, 4);
-  static int rowSpacing = 22; 
+  static final Vector2 gridSize = Vector2(8, 5);
+  static int rowSpacing = 16; 
   static int columnSpacing = 16; 
   // Swarm Movement data
   static const double xMoveAmount = 2.5;
@@ -45,7 +45,7 @@ class Swarm extends PositionComponent with HasGameRef<SpaceInvaders>{
     enemiesAlive = gridSize.x * gridSize.y;
     enemyShooters = <Enemy>[]; 
     isMovingRight = true;
-    position.y = gameRef.size.y / 4;
+    position.y = gameRef.size.y / 7;
 
     setSwarmGrid();
     pickShooter();
