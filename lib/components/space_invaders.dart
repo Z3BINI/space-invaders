@@ -82,8 +82,8 @@ class SpaceInvaders extends FlameGame with HasKeyboardHandlerComponents, HasColl
 
   void gameOver() {
     FlameAudio.play('game_over.mp3');
-    Future.delayed(const Duration(seconds: 1), () {
-      swarm.die();
+    swarm.die();// keep them from moving out of screen
+    Future.delayed(const Duration(seconds: 2), () {
       resetGame();
     });
   }
